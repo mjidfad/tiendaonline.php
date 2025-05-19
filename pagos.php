@@ -6,9 +6,10 @@
         <title>PayPal JS SDK Standard Integration</title>
     </head>
     <body>
+        <div style="margin:auto;width:50%;">
         <div id="paypal-button-container"></div>
         <p id="result-message"></p>
-
+</div>
         <?php
 
     $total=$_POST['total'];

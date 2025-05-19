@@ -122,22 +122,43 @@ public function mostrarA() {
     }
 }
 //Para buscar los datos a partir del nombre public function buscar($cadena)
-   
+
+
 public function buscarA($cadena) {
-    $pdo = "SELECT * FROM articulos WHERE nombre LIKE :cadena ORDER BY nombre";
+
+
+    $pdo = "SELECT * FROM articulos WHERE nombre LIKE :cadena ORDER BY nombre ";
     try {
+        // Prepare the statement
         $stmt = $this->db->prepare($pdo);
+        // Bind the search term with wildcard characters
         $stmt->bindValue(':cadena', "%$cadena%", PDO::PARAM_STR);
+        // Execute the query
         $stmt->execute();
+        // Fetch the results as an associative array
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $socios = [];
+        // Initialize an array to store Articulos objects
+        $articulos = [];
         foreach ($result as $row) {
-            $socios[] = new Articulos($row['codigo'],$row['nombre'],$row['descripcion'], $row['categoriapadre']
-            , $row['categoriahijo'], $row['precio'],$row['descuento'],$row['imagen']);
+            // Create an Articulos object and add it to the array
+            $articulos[] = new Articulos(
+                $row['codigo'],
+                $row['nombre'],
+                $row['descripcion'],
+                $row['categoriapadre'],
+                $row['categoriahijo'],
+                $row['precio'],
+                $row['descuento'],
+                $row['imagen']
+            );
         }
-        return $socios;
+        // Return the array of Articulos objects
+        return $articulos;
     } catch (PDOException $e) {
+        // Log the error or handle it properly
+        // For example, throw the exception or log it to a file
+        error_log($e->getMessage()); // Log error
         return "Error en la búsqueda: " . $e->getMessage();
     }
 }

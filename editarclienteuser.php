@@ -65,11 +65,11 @@ if (isset($_SESSION['dni'])) {
         $telefono = $_POST['telefono'];
         $email = $_POST['email'];
         $contrasena = $_POST['contrasena'];
-
+        $contrasena2 = password_hash($contraseña, PASSWORD_BCRYPT);
         // Actualizar los datos del cliente
 
         $sql = "UPDATE usuarios SET  nombre='$nombre' , direccion='$direccion',localidad='$localidad',provincia='$provincia',telefono='$telefono', email='$email'
-        ,contrasena='$contrasena' WHERE dni='$dni'";
+        ,contrasena='$contrasena2' WHERE dni='$dni'";
 
         // Ejecutar la consulta
 

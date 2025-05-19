@@ -4,14 +4,12 @@ session_start();
 
 include 'clases.php';
 include 'gestionararticulos.php';
-$host = 'sql312.infinityfree.com';  // Database host
-$dbname = 'if0_38397091_abdelmjidfaddoul6';  // Database name
-$username = 'if0_38397091';  // Database username
-$password = 'aeouSECyCHNsSn';
-$pdo = new mysqli($host, $username, $password, $dbname);
-
-
-// Definir cuántos usuarios por página
+include 'db2.php';
+if (!isset($_SESSION['rol'])) {
+    // Si no hay sesión, redirigir al login
+    header("Location: index.php");
+    exit();
+}
 $usuarios_por_pagina = 4;
 
 // Obtener el número de página actual, si no se pasa ningún parámetro, se asume la página 1
@@ -59,6 +57,7 @@ $total_paginas = ceil($total_usuarios / $usuarios_por_pagina);
                     <th>categoriapadre</th>
                     <th>categoriahijo</th>
                     <th>Precio</th>
+                    <th>Descuento</th>
                     <th>imagen</th>
                     <th>editar</th>
                     <th>eleminar</th>
@@ -74,16 +73,33 @@ $total_paginas = ceil($total_usuarios / $usuarios_por_pagina);
                         <td><?php echo htmlspecialchars($articulo['descripcion']); ?></td>
                         <td><?php echo htmlspecialchars($articulo['categoriapadre']); ?></td>
                         <td><?php echo htmlspecialchars($articulo['categoriahijo']); ?></td>
-                        <td><?php echo htmlspecialchars($articulo['precio']); ?></td>
+                        <td><?php echo htmlspecialchars($articulo['precio']); ?>  €</td>
+                        <td>
+                            <?php if ($articulo["descuento"] > 0) { ?>
+                                <p style="color: red; font-size: 18px;"><?php echo $articulo["descuento"] ?> %</p>
+                            <?php } else { ?>
+                                <p><?php echo $articulo["descuento"] ?> % </p>
+                            <?php } ?>
+                        </td>
                         <td> <img src="<?php echo htmlspecialchars($articulo['imagen']); ?>" width="80" height="70" srcset=""> </td>
-                        <td><a href='editararticulos.php?editar={$articulo->getNombre()}'>Editar</a></td>
-                        <td><a href='eliminararticulos.php?eliminar={$articulo->getNombre()}'>Eliminar</a></td>
-
-
+                        <td><a href='editararticulos.php?codigo=<?php echo $articulo["codigo"] ?>'><img name='borrar' src='../imagnes2/check2.png' height='25' ></a></td>
+                        <td><a onclick=' return confirmar()' href='eliminararticulos.php?eliminar=<?php echo $articulo["codigo"] ?>'><img height='25' src='../imagnes2/close2.png'></a></td>
                     </tr>
-                <?php } }?>
-
+                <?php }} ?>
                 </table>
+                <script>
+                            function confirmar() {
+                                // Confirmar la eliminación
+                                var confirmacion = confirm("Estás seguro de que deseas eliminar este usuario?");
+                                if (confirmacion) {
+                                    alert("Articulo eliminado  corectamente ");
+                                    return true;
+                                } else {
+                                    return false;
+                                    alert("Articulo  no eliminado");
+                                }
+                            }
+                        </script>
         </div>
     </div>
     <div class="hijo3">
@@ -107,7 +123,7 @@ $total_paginas = ceil($total_usuarios / $usuarios_por_pagina);
 echo '<div class="d-flex justify-content-center">';
 if ($pagina > 1) {
        //echo '<a href="?pagina=1">Primera</a>';
-       echo '<a class="mx-1" href="?pagina=' . ($pagina - 1) . '"><img class="mb-1" id="im" src="back.png" alt="" height="12px"></a>';
+       echo '<a class="mx-1" href="?pagina=' . ($pagina - 1) . '"><img class="mb-1" id="im" src="back.png" alt="" height="12px"> Anterior</a>';
    }
    for ($i = 1; $i <= $total_paginas; $i++) {
        if ($i == $pagina) {
@@ -117,7 +133,7 @@ if ($pagina > 1) {
        }
    }
    if ($pagina < $total_paginas) {
-       echo '<a class="mx-1" href="?pagina=' . ($pagina + 1) . '"><img class="mb-1" id="im" src="icon1.png" alt="" height="12px"></a>';
+       echo '<a class="mx-1" href="?pagina=' . ($pagina + 1) . '"><img class="mb-1" id="im" src="icon1.png" alt="" height="12px"> Seguiente</a>';
        //echo '<a href="?pagina=' . $total_paginas . '">Última</a>';
    }
     echo '</div>';

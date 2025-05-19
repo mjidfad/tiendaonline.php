@@ -1,30 +1,27 @@
-<?php include("header.php");
+<?php 
+session_start();
+if (!isset($_SESSION['rol'])) {
+    // Si no hay sesión, redirigir al login
+    header("Location: index.php");
+    exit();
+}
+include("header.php");
 // Obtener categorías padre
-$host = 'sql312.infinityfree.com';  // Database host
-$dbname = 'if0_38397091_abdelmjidfaddoul6';  // Database name
-$username = 'if0_38397091';  // Database username
-$password = 'aeouSECyCHNsSn';
-
-$pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+include 'db.php';
 
 ?>
 <div class=" d-flex flex-row" style="width:100%;height:auto;">
     <div class="hijo1 ">
-        <!--?php include_once("side.php"); ?-->
+        <?php include_once("side.php"); ?>
     </div>
-    <div class="  d-flex flex-column " style="width:1000px;font-size: 16px; ">
-        <div style="width:50%;margin:auto;padding:10px;">
+    <div class="  d-flex flex-column " style="font-size: 16px;width:75%;;padding-top:10px;">
+        <div style="width:50%;margin:auto;padding:10px">
             <h5 id="h5" class="">Categorias :</h5>
             <ul>
                 <?php
-
-                // Crear la conexión
-
-
-                function displayCategories()
+                                function displayCategories()
                 {
-                    global $pdo;
+                    include 'db.php';
                     // Obtener categorías
                     $stmt = $pdo->query("SELECT * FROM categoria_padre");
                     $categories = $stmt->fetchAll();
@@ -32,7 +29,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     echo "<ul id='ul1'>";
 
                     foreach ($categories as $category) {
-                        echo "<li style='border: 1px solid #ccc; margin: 5px; padding: 10px;text-align:left;'>";
+                        echo "<li style='text-align:left;display:flex;flex-direccion:row;'>";
                         echo  htmlspecialchars($category['name']);
                         echo " <a href='?editCategory=" . $category['id'] . "'><img <img onclick='edit()' name='borrar' src='../imagnes2/check2.png' height='20' ></a>  ";
                         echo " <a href='?deleteCategory=" . $category['id'] . "'onclick=' return confirmar()'    ><img height='20' src='../imagnes2/close2.png'></a>";
@@ -57,10 +54,12 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                         <script>
                             function confirmar() {
                                 // Confirmar la eliminación
-                                var confirmacion = confirm("Estás seguro de que deseas eliminar este usuario?");
+                                var confirmacion = confirm("Estás seguro de que deseas eliminar la categoria?");
                                 if (confirmacion) {
                                     alert("categoria eliminada corectamente ");
-                                    return true;
+                                   
+                                  
+                                    window.location.reload();
 
                                 } else {
                                     return false;
@@ -68,6 +67,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
                                 }
                             }
+                            confirmar;
                         </script>
                     <?php
 
@@ -89,7 +89,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     }
 
                     if (isset($_GET['editCategory'])) {
-                        $pdo = new mysqli("sql312.infinityfree.com", "if0_38397091", "aeouSECyCHNsSn", "if0_38397091_abdelmjidfaddoul6");
+                        include 'db2.php';
                         $categoryId = $_GET['editCategory'];
                         $query = "SELECT * FROM categoria_padre WHERE id = ?";
                         $stmt = $pdo->prepare($query);
@@ -108,8 +108,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     }
                     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     if (isset($_GET['editSubcategory'])) {
-
-                        $pdo = new mysqli("localhost", "root", "", "abdelmjidfaddoul6");
+                        include 'db2.php';
                         $subcategoryId = $_GET['editSubcategory'];
                         $sql = "SELECT * FROM categoria_padre ";
                         $result = $pdo->query($sql);
@@ -206,7 +205,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             <li class="list-group-item border-0 border-bottom"><a href="editor.php">monstrar articulos</a></li>
             <li class="list-group-item border-0 border-bottom"><a href="añadirarticulos.php">añadir articulos</a></li>
             <li class="list-group-item border-0 border-bottom"><a href="categorias.php">añadir gategorias</a></li>
-            <li class="list-group-item border-0 border-bottom"><a href="../home/cerrar.php">cerrar session</a></li>
+            <li class="list-group-item border-0 border-bottom"><a href="cerrar.php">cerrar session</a></li>
 
         </ul>
 

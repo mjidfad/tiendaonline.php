@@ -1,18 +1,18 @@
-<?php include("header.php");
-    $host = 'sql312.infinityfree.com';  // Database host
-    $dbname = 'if0_38397091_abdelmjidfaddoul6';  // Database name
-    $username = 'if0_38397091';  // Database username
-    $password = 'aeouSECyCHNsSn';
-    
-$pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+<?php 
+session_start();
+if (!isset($_SESSION['rol'])) {
+    // Si no hay sesión, redirigir al login
+    header("Location: index.php");
+    exit();
+}
+include("header.php");
+include 'db.php';
 ?>
 <?php
 ////function agregar padre
 function addCategory($name)
 {
-    global $pdo;
+    include 'db.php';
     $stmt = $pdo->prepare("SELECT * FROM categoria_padre WHERE  name = ?");
     $stmt->execute([$name]);
     if ($stmt->rowCount() > 0) {
@@ -30,7 +30,7 @@ function addCategory($name)
 //function agregar hijos
 function addSubcategory($categoryId, $name)
 {
-    global $pdo;
+    include 'db.php';
     // Verificar si el hijo ya existe para esa categoría
     $stmt = $pdo->prepare("SELECT * FROM categoria_hijos WHERE category_id = ? AND name = ?");
     $stmt->execute([$categoryId, $name]);
@@ -54,7 +54,7 @@ function addSubcategory($categoryId, $name)
     <div class="hijo1 " style="width:14%;" >
         <?php include("side.php") ?>
     </div>
-    <div class="hijo2  "style="font-size: 16px;width:1000px;">
+    <div class="hijo2  "style="font-size: 16px;width:75%;height:80vh;padding-top:15px;">
         <div style="width:50%;margin:auto;padding:10px;">
             <form method="post" action="">
                 <label for="">Agregar categoria padre :</label><br>
@@ -65,6 +65,7 @@ function addSubcategory($categoryId, $name)
                 <label for="">Categorias padre :</label>
                 <select class="form-control " name="categoryId">
                     <?php
+                    include 'db.php';
                     $stmt = $pdo->query("SELECT * FROM categoria_padre");
                     $subcategories = $stmt->fetchAll();
 
@@ -92,11 +93,11 @@ function addSubcategory($categoryId, $name)
         echo "<script type='text/javascript'>window.location.href = 'categorias.php';</script>";
     }
     ?>
-    <div class="hijo3" style="width:16%;">
+    <div class="hijo3" style="width:14%;">
         <ul class="list-group pt-4">
             <li class="list-group-item border-0 border-bottom"><a href="editor.php">monstrar articulos</a></li>
             <li class="list-group-item border-0 border-bottom"><a href="añadirarticulos.php">añadir articulos</a></li>
-            <li class="list-group-item border-0 border-bottom"><a href="editarcategorias.php">gestion categorias</a></li>
+            <li class="list-group-item border-0 border-bottom"><a href="editarcategorias.php">editar categorias</a></li>
             <li class="list-group-item border-0 border-bottom"><a href="cerrar.php">cerrar session</a></li>
         </ul>
 

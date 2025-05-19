@@ -1,5 +1,10 @@
 <?php
 session_start();
+if (!isset($_SESSION['rol'])) {
+    // Si no hay sesión, redirigir al login
+    header("Location: index.php");
+    exit();
+}
 include 'db.php';
 include 'clases.php';
 include 'gestionararticulos.php';
@@ -29,7 +34,7 @@ $stmt->execute();
         <?php include("side.php") ?>
     </div>
     <div class="hijo2   "style="width: 74%;">
-        <div style="display: flex;width:100%;height:auto;justify-content: space-between;margin: 5px;">
+        <div style="display: flex;width:100%;height:auto;justify-content: space-between;margin: 5px;padding-top:10px;">
             <h4 style=""> hola <?php echo $_SESSION['nombre'] ?> </h4><a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Ordenar Articulos
             </a>
@@ -49,6 +54,7 @@ $stmt->execute();
                     <th>categoriapadre</th>
                     <th>categoriahijo</th>
                     <th>Precio</th>
+                    <th>Descuento</th>
                     <th>imagen</th>
                     <th>editar </th>
                     <th>eleminar </th>
@@ -61,15 +67,19 @@ $stmt->execute();
                         <td><?php echo htmlspecialchars($articulo['descripcion']); ?></td>
                         <td><?php echo htmlspecialchars($articulo['categoriapadre']); ?></td>
                         <td><?php echo htmlspecialchars($articulo['categoriahijo']); ?></td>
-                        <td><?php echo htmlspecialchars($articulo['precio']); ?></td>
+                        <td><?php echo htmlspecialchars($articulo['precio']); ?>  €</td>
+                        <td>
+                        <?php if ($articulo["descuento"] > 0) { ?>
+                    <p style="color: red; font-size: 18px;"><?php echo $articulo["descuento"] ?> %</p>
+                <?php } else { ?>
+                    <p  ><?php echo $articulo["descuento"] ?> % </p>
+                <?php } ?>
+                        </td>
                         <td> <img src="<?php echo htmlspecialchars($articulo['imagen']); ?>" width="80" height="70" srcset=""> </td>
-                        <td><a href='editararticulos.php?codigo=<?php echo $articulo["codigo"] ?>'>Editar</a></td>
-                        <td><a onclick=' return confirmar()' href='eliminararticulos.php?eliminar=<?php echo $articulo["codigo"] ?>'>Eliminar</a></td>
-
-
+                        <td><a href='editararticulos.php?codigo=<?php echo $articulo["codigo"] ?>'><img name='borrar' src='../imagnes2/check2.png' height='25' ></a></td>
+                        <td><a onclick=' return confirmar()' href='eliminararticulos.php?eliminar=<?php echo $articulo["codigo"] ?>'><img height='25' src='../imagnes2/close2.png'></a></td>
                     </tr>
                 <?php } ?>
-
                 </table>
                 <script>
                             function confirmar() {
@@ -78,17 +88,15 @@ $stmt->execute();
                                 if (confirmacion) {
                                     alert("Articulo eliminado  corectamente ");
                                     return true;
-
                                 } else {
                                     return false;
                                     alert("Articulo  no eliminado");
-
                                 }
                             }
                         </script>
         </div>
     </div>
-    <div class="hijo3" style="width: 14%;">
+    <div class="hijo3" style="width: 14%;margin:0;">
         <ul class="list-group pt-4">
         <li class="list-group-item border-0 border-bottom"><a href="editor.php">monstrar articulos</a></li>
             <li class="list-group-item border-0 border-bottom"><a href="añadirarticulos.php">añadir articulos</a></li>
@@ -107,7 +115,7 @@ $stmt->execute();
 echo '<div class="d-flex justify-content-center">';
 if ($pagina > 1) {
         //echo '<a href="?pagina=1">Primera</a>';
-        echo '<a class="mx-1" href="?pagina=' . ($pagina - 1) . '"><img class="mb-1" id="im" src="back.png" alt="" height="12px"></a>';
+        echo '<a class="mx-1" href="?pagina=' . ($pagina - 1) . '"><img class="mb-1" id="im" src="back.png" alt="" height="12px"> Anterior</a>';
     }
     for ($i = 1; $i <= $total_paginas; $i++) {
         if ($i == $pagina) {
@@ -117,7 +125,7 @@ if ($pagina > 1) {
         }
     }
     if ($pagina < $total_paginas) {
-        echo '<a class="mx-1" href="?pagina=' . ($pagina + 1) . '"><img class="mb-1" id="im" src="icon1.png" alt="" height="12px"></a>';
+        echo '<a class="mx-1" href="?pagina=' . ($pagina + 1) . '"><img class="mb-1" id="im" src="icon1.png" alt="" height="12px"> Seguiente</a>';
         //echo '<a href="?pagina=' . $total_paginas . '">Última</a>';
     }
      echo '</div>';

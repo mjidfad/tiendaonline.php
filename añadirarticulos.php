@@ -1,15 +1,13 @@
 <?php include("header.php"); 
 
-$host = 'sql312.infinityfree.com';  // Database host
-$dbname = 'if0_38397091_abdelmjidfaddoul6';  // Database name
-$username = 'if0_38397091';  // Database username
-$password = 'aeouSECyCHNsSn';
+include 'db.php';
 
-$pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-
-
+session_start();
+if (!isset($_SESSION['rol'])) {
+    // Si no hay sesión, redirigir al login
+    header("Location: index.php");
+    exit();
+}
 
 
 
@@ -33,6 +31,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 <label for="">Categorias padre :</label>
                 <select class="form-control " name="categoriapadre" required>
                     <?php
+                    include 'db.php';
                     $stmt = $pdo->query("SELECT * FROM categoria_padre");
                     $subcategories = $stmt->fetchAll();
 
@@ -89,10 +88,6 @@ include 'clases.php';
 
 
 if (isset($_POST['subir'])) {
-
-
-
-
     $codigo = $_POST['codigo'];
     $nombre = $_POST['nombre'];
     $categoriapadre = $_POST['categoriapadre'];

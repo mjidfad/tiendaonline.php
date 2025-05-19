@@ -2,7 +2,11 @@
 
 
 session_start();
-
+if (!isset($_SESSION['rol'])) {
+    // Si no hay sesión, redirigir al login
+    header("Location: index.php");
+    exit();
+}
 
 ?>
 <?php include("headeruser.php")  ?>
@@ -10,7 +14,7 @@ session_start();
     <div class="hijo1 " style="width:12%">
         <?php include("sideuser.php") ?>
     </div>
-    <div class="hijo2   p-1 d-flex flex-column" style="width:74%;">
+    <div class="hijo2   p-1 d-flex flex-column" style="width:74%;margin-top:10px;">
 
         <h4 style="">Datos usuario , <?php echo $_SESSION['nombre'] ?> </h4>
 
@@ -38,9 +42,12 @@ session_start();
             <td><?php echo $_SESSION['provincia']; ?></td>
             <td><?php echo $_SESSION['telefono']; ?></td>
             <td><?php echo $_SESSION['email']; ?></td>
-            <td><?php echo $_SESSION['contrasena']; ?></td>
-            <?php echo "<td><a style='color:green;' href='editarclienteuser.php?dni=" . $_SESSION['dni'] . "'>editar</a></td>"  ?>
-            <?php echo "<td><a style='color:red;' href='eliminarclienteuser.php?dni=" . $_SESSION['dni'] . "' onclick=' return confirmar()'   >eliminar</a></td>"; ?>
+            <td><?php
+                                $password = htmlspecialchars($_SESSION['contrasena']);
+                                echo strlen($password) > 8 ? substr($password, 0, 8) . ' ....' : $password;
+                                ?></td>
+            <?php echo "<td><a style='color:green;' href='editarclienteuser.php?dni=" . $_SESSION['dni'] . "'><img name='borrar' src='../imagnes2/check2.png' height='25' ></a></td>"  ?>
+            <?php echo "<td><a style='color:red;' href='eliminarclienteuser.php?dni=" . $_SESSION['dni'] . "' onclick=' return confirmar()'   ><img height='25' src='../imagnes2/close2.png'></a></td>"; ?>
 
             </table>
 

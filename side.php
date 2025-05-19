@@ -1,92 +1,81 @@
 <div class="mt-2 ms-1">
-  <h5 id="h5" class="">Categorias <img id="im" src="../imagnes2/icon1.png" alt="" height="20px"></h5>
-  
+  <h5 id="h5" style="cursor: pointer;">Categorias 
+    <img id="im1" src="../imagnes2/icon1.png" style='cursor: pointer; transition: transform 0.3s ease; gap: 15px;' alt="" height="20px">
+  </h5>
 
-<?php
+  <?php
+  include 'db2.php';
+  $sql_padre = "SELECT * FROM categoria_padre";
+  $result_padre = $pdo->query($sql_padre);
 
-$host = 'sql312.infinityfree.com';  // Database host
-$dbname = 'if0_38397091_abdelmjidfaddoul6';  // Database name
-$username = 'if0_38397091';  // Database username
-$password = 'aeouSECyCHNsSn';
+  if ($result_padre->num_rows > 0) {
+      echo "<ul id='ul_principal' style='list-style: none; display: none;'>"; 
 
-// Crear conexión
-$conn = new mysqli($host, $username, $password, $dbname);
+      while($row_padre = $result_padre->fetch_assoc()) {
+          $padre_id = $row_padre["id"];
+          $padre_name = $row_padre["name"];
 
-// Consulta para obtener las categorías padre
-$sql_padre = "SELECT * FROM categoria_padre";
-$result_padre = $conn->query($sql_padre);
+          echo "<li>";
 
-if ($result_padre->num_rows > 0) {
-    // Iniciar la lista desordenada
-    echo "<ul style='display:none;' id='ul' >";
+          echo "<div  class='categoria-padre' style='display: flex; align-items: center; gap: 15px;'><a href='buscarpadre.php?name1=$padre_name'>$padre_name   </a>
+       <img  onclick='toggleHijos($padre_id);' id='imgpadre_$padre_id' height='15px' src='../imagnes2/icon1.png'   style='cursor: pointer; transition: transform 0.3s ease;'></div>";
 
-    // Recorrer cada categoría padre
-    while($row_padre = $result_padre->fetch_assoc()) {
-      echo "<li> <a href='buscarpadre.php?name=". $row_padre["name"] ."'>". $row_padre["name"] ."</a></li>";
+          $sql_hijas = "SELECT * FROM categoria_hijos WHERE category_id = $padre_id";
+          $result_hijas = $pdo->query($sql_hijas);
 
-        // Consulta para obtener las categorías hijas de esta categoría padre
-        $sql_hijas = "SELECT * FROM categoria_hijos WHERE category_id = " . $row_padre["id"];
-        $result_hijas = $conn->query($sql_hijas);
+          if ($result_hijas->num_rows > 0) {
+              echo "<ul id='hijos_$padre_id' style='display: none; margin-left: 20px;'>";
 
-        if ($result_hijas->num_rows > 0) {
-            // Iniciar una sublista para las categorías hijas
-            echo "<ul>";
+              while($row_hija = $result_hijas->fetch_assoc()) {
+                  $hija_name = $row_hija["name"];
+                  echo "<li><a href='buscarhijo.php?name2=$hija_name&name1=$padre_name'>$hija_name</a></li>";
+              }
 
-            // Recorrer cada categoría hija
-            while($row_hija = $result_hijas->fetch_assoc()) {
-              
-                 echo "<li> <a href='buscarhijo.php?name=". $row_hija["name"] ."'>". $row_hija["name"] ."</a></li>";
-            }
+              echo "</ul>";
+          }
 
-            // Cerrar la sublista
-            echo "</ul>";
-        }
-    }
+          echo "</li>";
+      }
 
-    // Cerrar la lista desordenada
-    echo "</ul>";
-} else {
-    echo "No se encontraron categorías padre.";
-}
-    ?>
-
-
-
-
+      echo "</ul>";
+  } else {
+      echo "No se encontraron categorías padre.";
+  }
+  ?>
 </div>
 
+<!-- Mostrar u ocultar categorías hijas -->
 <script>
-  let h5 = document.getElementById("h5");
-  let h6 = document.getElementById("h6");
-  let bmujeres = document.getElementById("bmujeres");
-  let bhombres = document.getElementById("bhombres");
-  let im = document.getElementById("im");
-  let im2 = document.getElementById("im2");
-  let im3 = document.getElementById("im3");
-  let ul = document.getElementById("ul");
-  let ulmujeres = document.getElementById("ulmujeres");
-  let ulhombres = document.getElementById("ulhombres");
 
+function toggleHijos(padreId) {
+    var ul = document.getElementById("hijos_" + padreId);
+    var im = document.getElementById("imgpadre_" + padreId);
 
-  // Agrega el evento de clic al botón
-  h5.addEventListener('click', ok);
-  bmujeres.addEventListener("click", ok2);
-  bhombres.addEventListener("click", ok3);
-
-
-  function ok() {
-    if (ul.style.display === "block") {
-      ul.style = "display:none;";
-      im.classList.remove("down");
-
-
+    if (ul.style.display === "none") {
+        ul.style.display = "block";
+        im.classList.add("down");
     } else {
-      ul.style = "display:block;";
-      im.classList.add("down");
+        ul.style.display = "none";
+        im.classList.remove("down");
     }
-  }
+}
 </script>
 
+<!-- Mostrar u ocultar la lista principal cuando se pulsa h5 -->
+<script>
+document.getElementById("h5").addEventListener("click", function() {
+    var ulPrincipal = document.getElementById("ul_principal");
+    var im = document.getElementById("im1");
+
+    if (ulPrincipal.style.display === "none") {
+        ulPrincipal.style.display = "block";
+        im.classList.add("down");
+    } else {
+        ulPrincipal.style.display = "none";
+        im.classList.remove("down");
+    }
+});
+</script>
 
 
 <style>
@@ -95,12 +84,17 @@ if ($result_padre->num_rows > 0) {
   #bhombres {
     cursor: pointer;
   }
-
+.categoria-padre:hover img {
+ box-shadow: 0px 0px 10px red;
+  
+}
   .down {
 
-    transform: rotate(90deg);
-    /*transition: 0.5s ease-in-out;*/
+    transform: rotate(90deg) scale(1.3);
+    transition: 0.5s ease-in-out;
+    
   }
+
 
   li {
     list-style: none;
@@ -119,3 +113,4 @@ if ($result_padre->num_rows > 0) {
 
   }
 </style>
+ 

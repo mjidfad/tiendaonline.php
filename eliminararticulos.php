@@ -18,25 +18,15 @@ $gestor = new Gestorarticulos($conexion);
             if (isset($_GET['eliminar'])) {
                 $nombreEliminar = $_GET['eliminar'];
                 $resultado = $gestor->eliminarA($nombreEliminar);
+                echo '<script type="text/javascript">
+        setTimeout(function() {
+            window.location.href = "editor.php"; // URL to redirect to
+        }, 1000); // 2000 milliseconds = 2 seconds
+      </script>';
 
-                // Consultar los datos
-                $socios = $gestor->mostrarA();
-                if (count($socios) > 0) {
-                    echo "<table style='width:90%;margin:auto;margin-top:10px;'>\n";
-                    echo "<tr><th>codigo</th><th>nombre</th><th>descripcion</th><th>categoriapadre</th><th>categoriahijo</th><th>precio</th><th>imagen</th><th>accion</th></tr>\n";
-                    foreach ($socios as $socio) {
-                        echo "<tr>\n";
-                        echo "<td>{$socio->getCodigo()}</td>\n";
-                        echo "<td>{$socio->getNombre()}</td>\n";
-                        echo "<td>{$socio->getDescripcion()}</td>\n";
-                        echo "<td>{$socio->getCategoriapadre()}</td>\n";
-                        echo "<td>{$socio->getCategoriahijo()}</td>\n";
-                        echo "<td>{$socio->getPrecio()}</td>\n";
-                        echo "<td><img src='{$socio->getImagen()}' width='100px' height='100px'></td>\n";
-                        echo "<td><a href='eliminararticulos.php?eliminar={$socio->getCodigo()}'>Eliminar</a></td>\n";
-                        echo "</tr>\n";
-                    }
-                    echo "</table>\n";
+     
+        
+               
                 } else {
                
                     echo "<div class='alerta'>
@@ -45,7 +35,7 @@ $gestor = new Gestorarticulos($conexion);
             <script> function cerrarAlerta() { document.querySelector('.alerta').style.display='none';}</script>";
                 }
                 echo $resultado;
-            }
+            
             ?>
         </div>
     </div>

@@ -18,8 +18,8 @@
         
       </ul>
       <form class="d-flex" method="post" action="buscararticulo.php" >
-        <input class="form-control me-2" type="search" placeholder="Search" name="cadena" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit"  >Search</button>
+        <input class="form-control me-2" type="search" placeholder="Buscar articulo" name="cadena" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit" name="buscar" >Buscar</button>
       </form>
     </div>
   </div>

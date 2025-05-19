@@ -4,13 +4,17 @@ session_start();
 include 'clases.php';
 include 'gestionararticulos.php';
 include 'db.php';
-
+if (!isset($_SESSION['rol'])) {
+    // Si no hay sesión, redirigir al login
+    header("Location: ../index.php");
+    exit();
+}
+$cliente=$_SESSION['id'];
 if (isset($_POST['añadir'])) {
-    
     $id_producto = $_POST['id_producto'];
     $cantidad = max(1, intval($_POST['cantidad'])); // Asegurar que la cantidad sea al menos 1
     $stmt = $pdo->prepare("SELECT * FROM articulos WHERE id = :id");
-    $stmt->execute([':id' => $id_producto]); 
+    $stmt->execute([':id' => $id_producto]);
     $producto = $stmt->fetch();
     if ($producto) {
         // Crear carrito y agregarlo si no existe
@@ -19,43 +23,69 @@ if (isset($_POST['añadir'])) {
         }
         $encontrado = false;
         foreach ($_SESSION['carrito'] as &$item) {
-            if ($item['id'] === $producto['id']) {
+            if ($item['codigo'] === $producto['codigo']) {
                 $item['cantidad'] += $cantidad;
+           
                 $encontrado = true;
                 break;
             }
         }
-  
         // Si no está en el carrito, agregarlo
         if (!$encontrado) {
             $_SESSION['carrito'][] = [
+               
                 'id' => $producto['id'],
+                'codigo' => $producto['codigo'],
                 'nombre' => $producto['nombre'],
+                'imagen' =>$producto['imagen'],
                 'precio' => $producto['precio'],
-                'cantidad' => $cantidad
+                'descuento' => $producto['descuento'],
+                'cantidad' => $cantidad,
             ];
+            include 'db2.php';
+            $total= $producto['precio']-( $producto['precio']*($producto['descuento']/100));
+            $stmt = $pdo->prepare("INSERT INTO carrito (id_producto,codigo, nombre,imagen, precio, descuento, cantidad, total, id_cliente) VALUES ( ?,?,?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("isssdiiid",$id_producto, $producto['codigo'], $producto['nombre'], $producto['imagen'], $producto['precio'],
+             $producto['descuento'], $cantidad, $total, $cliente);
+            // Ejecutar el query
+           $stmt->execute();
         }
     }
-  
 }
+
+include 'db.php';
 $conexion = $pdo;
 $REGS = 4;
 $pagina = 1;
 $inicio = 0;
+
 if (isset($_GET["pagina"])) {
     $pagina = $_GET["pagina"];
     $inicio = ($pagina - 1) * $REGS;
 }
-$name=$_GET['name'];
 
-$stmt = $conexion->prepare("SELECT * FROM articulos WHERE categoriahijo = '$name'");
+// Include db connection
+include 'db2.php';
+
+$name1 = $_GET['name1'];
+$name2 = $_GET['name2'];
+
+// Prepare the query to count the total number of records
+$stmt = $conexion->prepare("SELECT * FROM articulos WHERE categoriahijo = :name2");
+$stmt->bindParam(':name2', $name2, PDO::PARAM_STR);
 $stmt->execute();
-//contar los registros y las páginas con la división entera
+
+// Get the total number of records
 $num_total_registros = $stmt->rowCount();
 $total_paginas = ceil($num_total_registros / $REGS);
-$stmt = $conexion->prepare("SELECT * FROM articulos WHERE categoriahijo = '$name' LIMIT " . $inicio . " ," . $REGS);
-$stmt->execute();
 
+// Prepare the query to fetch the paginated results
+$stmt = $conexion->prepare("SELECT * FROM articulos WHERE categoriapadre = :name1 AND categoriahijo = :name2 LIMIT :inicio, :regs");
+$stmt->bindParam(':name1', $name1, PDO::PARAM_STR);
+$stmt->bindParam(':name2', $name2, PDO::PARAM_STR);
+$stmt->bindParam(':inicio', $inicio, PDO::PARAM_INT);
+$stmt->bindParam(':regs', $REGS, PDO::PARAM_INT);
+$stmt->execute();
 
 ?>
 <?php include("headeruser.php")  ?>
@@ -63,72 +93,84 @@ $stmt->execute();
     <div class="hijo1 " style="width:12%">
     <?php include("sideuser.php") ?>
     </div>
-    <div class="hijo2   p-1 d-flex flex-column" style="width:75%;">
+    <div class="hijo2   p-1 d-flex flex-column" style="width:74%;margin-top:10px;">
         <div class="dropdown  me-3 w-100 d-flex justify-content-between">
         <h4 style=""> hola <?php echo $_SESSION['nombre'] ?> </h4>
             <a class="nav-link dropdown-toggle float-end text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Ordenar articulos
             </a>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="ordenaruseraz.php">ordenar por Ascendente</a></li>
-                <li><a class="dropdown-item" href="ordenaruserza.php">ordenar por Descendente</a></li>
-                <li><a class="dropdown-item" href="ordenaruserbarato.php">ordenar por precio bajo</a></li>
-                <li><a class="dropdown-item" href="ordenarusercaro.php">ordenar por precio alto</a></li>
+                <li><a class="dropdown-item" href="ordenaruseraz.php">Ordenar por Ascendente</a></li>
+                <li><a class="dropdown-item" href="ordenaruserza.php">Ordenar por Descendente</a></li>
+                <li><a class="dropdown-item" href="ordenaruserbarato.php">Ordenar por precio bajo</a></li>
+                <li><a class="dropdown-item" href="ordenarusercaro.php">Ordenar por precio alto</a></li>
             </ul>
         </div>
         <div class="mt-4 d-flex flex-row justify-content-around">
-        <?php
-    while($fila = $stmt->fetch()) {
-    ?>  
-            <div class="card m-1" style="width: 30%;">
-                <img style="object-fit: cover;" src="<?php echo $fila["imagen"] ?>" class="card-img-top" alt=""  height="150px"  width="80px">
-                <div class="card-body">
+            <?php while ($fila = $stmt->fetch()) { ?>
+                <div class="card m-1 w-25">
+                    <img src="<?php echo $fila["imagen"] ?>" class="card-img-top img2" alt="" height="150px" width="80px">
                     <h5 class="card-title"><?php echo $fila["nombre"] ?></h5>
                     <p class="card-text"><?php echo $fila["descripcion"] ?></p>
-                    <p><?php echo $fila["precio"] ?></p>
-                    <form method='POST' class="d-flex flex-row">
-                <input type='hidden' name='id_producto' value='<?php echo $fila["id"] ?>'>
-                <input class="form-control" type='number' name='cantidad' value='0' min='1' style='width: 50px;' required>
-                <button  class="btn btn-primary" type='submit' name="añadir" >Añadir</button>
-            </form>
-                   
+                    <div class="d-flex flex-row justify-content-between">
+                        <p><?php echo $fila["precio"] ?> €</p>
+                        <?php if ($fila["descuento"] > 0) { ?>
+                            <p style="color: red; font-size: 18px;"><?php echo $fila["descuento"] ?> % descuento</p>
+                        <?php } else { ?>
+                            <p style="display:none"><?php echo $fila["descuento"] ?> % descuento</p>
+                        <?php
+                       // $descuento= $fila["precio"]-($fila["precio"]*($fila["descuento"]/100));
+                       }                    
+                        ?>                      
+                    </div> 
+                    <form method='POST' class="d-flex flex-row">                     
+                            <input type='hidden' name='id_producto' value='<?php echo $fila["id"] ?>'>
+                            <input class="form-control" type='number' name='cantidad' value='1' min='1' style='width: 50px;' required>
+                            <button class="btn btn-primary w-75" type='submit' name="añadir">Añadir</button>
+                        </form>
                 </div>
-            </div>
-            <?php } ?> 
-        </div>
+            <?php ?>
+            <?php
+} 
+?>
+       </div>
     </div>
-   
-
     <div class="hijo3" style="width:14%" >
-        <ul class="list-group pt-4">
-        <li class="list-group-item border-0 border-bottom"><a href="usuario.php">monstrar articulos</a></li>
-            <li class="list-group-item border-0 border-bottom"><a href="editardatosuser.php">editar datos</a></li>
-            <li class="list-group-item border-0 border-bottom"><a href="cerrar.php">cerrar session</a></li>
+    <ul class="list-group pt-4">
+            <li class="list-group-item border-0 border-bottom elemento"><a href="usuario.php">Monstrar articulos</a></li>
+            <li class="list-group-item border-0 border-bottom elemento"><a href="editardatosuser.php">Editar datos</a></li>
+            <li class="list-group-item border-0 border-bottom elemento"><a href="cerrar.php">Cerrar session</a></li>
         </ul>
+
     </div>
 </div>
+            
+
+
+
+
 <?php
 
-echo '<div class="d-flex justify-content-center">';
+echo '<div class="d-flex justify-content-center m-3">';
 if ($pagina > 1) {
-        //echo '<a href="?pagina=1">Primera</a>';
-        echo '<a class="mx-1" href="?pagina=' . ($pagina - 1) . '"><img class="mb-1" id="im" src="back.png" alt="" height="12px"></a>';
-    }
-    for ($i = 1; $i <= $total_paginas; $i++) {
-        if ($i == $pagina) {
-            echo "<span style='color:blue;'>$i</span>";
-        } else {
-            echo "<a class='mx-2' href=\"?pagina=$i\">$i</a>";
-        }
-    }
-    if ($pagina < $total_paginas) {
-        echo '<a class="mx-1" href="?pagina=' . ($pagina + 1) . '"><img class="mb-1" id="im" src="icon1.png" alt="" height="12px"></a>';
-        //echo '<a href="?pagina=' . $total_paginas . '">Última</a>';
-    }
-     echo '</div>';
-////////////
+    // Mantener los parámetros name1 y name2 en la URL
+    echo '<a class="mx-1" href="?pagina=' . ($pagina - 1) . '&name1=' . urlencode($name1) . '&name2=' . urlencode($name2) . '"><img class="mb-1" id="im" src="back.png" alt="" height="12px"></a>';
+}
 
+for ($i = 1; $i <= $total_paginas; $i++) {
+    if ($i == $pagina) {
+        echo "<span style='color:blue;'>$i</span>";
+    } else {
+        // Mantener los parámetros name1 y name2 en la URL
+        echo "<a class='mx-2' href=\"?pagina=$i&name1=" . urlencode($name1) . "&name2=" . urlencode($name2) . "\">$i</a>";
+    }
+}
 
+if ($pagina < $total_paginas) {
+    // Mantener los parámetros name1 y name2 en la URL
+    echo '<a class="mx-1" href="?pagina=' . ($pagina + 1) . '&name1=' . urlencode($name1) . '&name2=' . urlencode($name2) . '"><img class="mb-1" id="im" src="icon1.png" alt="" height="12px"></a>';
+}
+echo '</div>';
 
 
     ?>

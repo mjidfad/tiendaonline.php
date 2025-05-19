@@ -22,3 +22,13 @@
     border-radius: 4px;
     cursor: pointer;
 }
+.img {
+    transition: transform 1s ease; /* Transición suave */
+  }
+  
+  .img:hover {
+    transform: scale(1.1);
+    z-index: 1; /* Escala la imagen al doble de tamaño */
+  border-radius: 5px;
+  border: 1px solid olive;
+  }

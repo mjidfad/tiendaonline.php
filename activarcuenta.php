@@ -34,18 +34,14 @@ include("headerindex.php");
     </div>
 </div>
     <?php
-      $host = 'sql312.infinityfree.com';  // Database host
-      $dbname = 'if0_38397091_abdelmjidfaddoul6';  // Database name
-      $username = 'if0_38397091';  // Database username
-      $password = 'aeouSECyCHNsSn';
-    $conexion = new mysqli($host, $usuario, $clave, $basedatos);
+ include 'db2.php';
 
     if (isset($_POST['buscar'])) {
         $dni = $_POST['dni'];
         $email = $_POST['email'];
         $estado=$_POST['cambio'];
         $query = "SELECT * FROM usuarios WHERE dni = '$dni' AND email = '$email' AND estado ='$estado'";
-        $resultado = $conexion->query($query);
+        $resultado = $pdo->query($query);
 
         if ($resultado->num_rows > 0) {
     ?>
@@ -92,7 +88,7 @@ include("headerindex.php");
        
         
             $query2 = "UPDATE usuarios SET estado = '$estado' WHERE dni = '$dni'";
-            $result2 = $conexion->query($query2);
+            $result2 = $pdo->query($query2);
             if ($result2) {
                 echo "<div class='alerta'>
                 <h5>¡cuenta activada, inicia session para entrar ala tienda!</h5>

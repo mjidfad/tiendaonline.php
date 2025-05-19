@@ -14,7 +14,7 @@ include("headerindex.php");
 
             <form id="form-verificar" method="post" action="">
                 <label for="dni">DNI:</label>
-                <input class="form-control " type="text" id="dni" name="dni" required>
+                <input class="form-control " type="text" id="dni" maxlength="9" name="dni" required>
                 <br>
                 <label for="email">Correo Electrónico:</label>
                 <input class="form-control " type="email" id="email" name="email" required>
@@ -33,17 +33,13 @@ include("headerindex.php");
     </div>
 </div>
     <?php
-    $host = 'sql312.infinityfree.com';  // Database host
-    $dbname = 'if0_38397091_abdelmjidfaddoul6';  // Database name
-    $username = 'if0_38397091';  // Database username
-    $password = 'aeouSECyCHNsSn';
-    $conexion = new mysqli($host, $username, $password, $dbname);
+include 'db2.php';
 
     if (isset($_POST['buscar'])) {
         $dni = $_POST['dni'];
         $email = $_POST['email'];
         $query = "SELECT * FROM usuarios WHERE dni = '$dni' AND email = '$email'";
-        $resultado = $conexion->query($query);
+        $resultado = $pdo->query($query);
 
         if ($resultado->num_rows > 0) {
     ?>
@@ -53,7 +49,7 @@ include("headerindex.php");
   transform: translate(-50%, -50%);">
             <h3>Usuario con DNI <?php echo $dni ?> verificado. Ahora puedes cambiar tu contraseña</h3>
             <form id='cambiar-contraseña' method='post' action=''>
-                <input  type="hidden" name="dni" value="<?php echo $dni ?>">
+                <input  type="hidden" name="dni" maxlength="9" value="<?php echo $dni ?>">
                 <input type="hidden" name="email" value="<?php echo $email ?>">
                 <label for='nueva-contraseña'>Nueva Contraseña:</label>
                 <input class="form-control " type='password' id='nueva-contraseña' name='nueva-contraseña' required maxlength="6">
@@ -94,7 +90,7 @@ include("headerindex.php");
         $nueva_contraseña_hash = password_hash($nueva_contraseña, PASSWORD_DEFAULT);
         if ($nueva_contraseña == $confirmar_contraseña) {
             $query2 = "UPDATE usuarios SET contrasena = '$nueva_contraseña_hash' WHERE dni = '$dni'";
-            $result2 = $conexion->query($query2);
+            $result2 = $pdo->query($query2);
             if ($result2) {
                 echo "<div class='alerta'>
                 <h5>¡contraseña cambiada, inicia session para entrar ala tienda!</h5>
